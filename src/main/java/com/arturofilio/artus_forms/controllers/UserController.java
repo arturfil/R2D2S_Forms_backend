@@ -4,8 +4,11 @@ import javax.validation.Valid;
 
 import com.arturofilio.artus_forms.entities.UserEntity;
 import com.arturofilio.artus_forms.models.requests.UserRegisterRequestModel;
+import com.arturofilio.artus_forms.models.responses.UserRest;
+import com.arturofilio.artus_forms.services.IUserService;
 
-import org.apache.catalina.User;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,9 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    
+
+    @Autowired
+    IUserService userService;
+
     @PostMapping()
-    public String createUser(@RequestBody @Valid UserRegisterRequestModel userModel) {
-        return "User Created";
+    public UserRest createUser(@RequestBody @Valid UserRegisterRequestModel userModel) {
+        UserEntity user = userService.createUser(userModel);
+        UserRest userRest = new UserRest();
+        BeanUtils.copyProperties(user, userRest);
+        return userRest;
     }
 }
