@@ -49,11 +49,15 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             HttpServletResponse response, FilterChain chain,
             Authentication authencation) {
         String email = ((User) authencation.getPrincipal()).getUsername();
+        // String token = Jwts.builder()
+        //     .setSubject(email)
+        //     .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_DATE)) // today + extraDays
+        //     .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret())
+        //     .compact();
+
         String token = Jwts.builder()
-            .setSubject(email)
-            .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_DATE)) // today + extraDays
-            .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret())
-            .compact();
+            .setSubject(email).setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_DATE))
+            .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret()).compact();
         
         String data = new ObjectMapper().writeValueAsString(Map.of("token", token));
         
