@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Map;
 
 import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,7 +36,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     public Authentication attemptAuthentication(
             HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
-            UserLoginRequestModel userModel = new ObjectMapper().readValue(request.getInputStream(),
+            UserLoginRequestModel userModel = new ObjectMapper()
+                .readValue(request.getInputStream(),
                     UserLoginRequestModel.class);
             return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userModel.getEmail(),
                     userModel.getPassword(), new ArrayList<>()));
@@ -47,16 +49,12 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public void successfulAuthentication(HttpServletRequest request,
             HttpServletResponse response, FilterChain chain,
-            Authentication authencation) {
+            Authentication authencation) throws IOException, ServletException {
         String email = ((User) authencation.getPrincipal()).getUsername();
-        // String token = Jwts.builder()
-        //     .setSubject(email)
-        //     .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_DATE)) // today + extraDays
-        //     .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret())
-        //     .compact();
 
         String token = Jwts.builder()
-            .setSubject(email).setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_DATE))
+            .setSubject(email)
+            .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_DATE))
             .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret()).compact();
         
         String data = new ObjectMapper().writeValueAsString(Map.of("token", token));
