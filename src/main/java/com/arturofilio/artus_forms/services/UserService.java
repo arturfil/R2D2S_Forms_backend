@@ -38,5 +38,10 @@ public class UserService implements IUserService {
         if (userEntity == null) throw new UsernameNotFoundException(email);
         return new User(userEntity.getEmail(), userEntity.getPassword(), new ArrayList<>());
     }
+
+    @Override
+    public UserEntity getUser(String email) {
+        return userRepository.findByEmail(email);
+    }
     
 }
