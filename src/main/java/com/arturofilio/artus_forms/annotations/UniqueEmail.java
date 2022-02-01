@@ -14,7 +14,7 @@ import com.arturofilio.artus_forms.validators.UniqueEmailValidator;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UniqueEmail {
-    String message() default "User with email already exists";
+    String message() default "{artus_forms.constraints.email.unique.message}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }
