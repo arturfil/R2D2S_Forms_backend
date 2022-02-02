@@ -1,10 +1,13 @@
 package com.arturofilio.artus_forms;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
 
+import com.arturofilio.artus_forms.entities.UserEntity;
 import com.arturofilio.artus_forms.models.requests.UserRegisterRequestModel;
 import com.arturofilio.artus_forms.models.responses.UserRest;
 import com.arturofilio.artus_forms.models.responses.ValidationErrors;
@@ -56,7 +59,7 @@ public class UserControllerTests {
     }
 
     @Test // no name error display
-    public void createUser_withoutFields_displaysErrors_ForName() {
+    public void createUser_withoutName_displaysErrors_ForName() {
         UserRegisterRequestModel user = TestUtil.createValidUser();
         user.setName(null);
         ResponseEntity<ValidationErrors> response = 
@@ -66,7 +69,7 @@ public class UserControllerTests {
     }
     
     @Test // no email error display
-    public void createUser_withoutFields_displaysErrors_ForEmail() {
+    public void createUser_withouEmail_displaysErrors_ForEmail() {
         UserRegisterRequestModel user = TestUtil.createValidUser();
         user.setEmail(null);
         ResponseEntity<ValidationErrors> response = 
@@ -76,7 +79,7 @@ public class UserControllerTests {
     }
 
     @Test // no password error display
-    public void createUser_withoutFields_displaysErrors_ForPassword() {
+    public void createUser_withoutPassword_displaysErrors_ForPassword() {
         UserRegisterRequestModel user = TestUtil.createValidUser();
         user.setPassword(null);
         ResponseEntity<ValidationErrors> response = 
@@ -114,6 +117,39 @@ public class UserControllerTests {
         UserRegisterRequestModel user = TestUtil.createValidUser();
         ResponseEntity<UserRest> response = register(user, UserRest.class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
+    }
+
+    @Test
+    public void createValidUser_saveUserToDB() {
+        UserRegisterRequestModel user = TestUtil.createValidUser();
+        ResponseEntity<UserRest> response = register(user, UserRest.class);
+        UserEntity userDb = userRespository.findById(response.getBody().getId());
+        assertNotNull(userDb);
+    }
+
+    @Test
+    public void createValidUser_passwordIsHashed() {
+        UserRegisterRequestModel user = TestUtil.createValidUser();
+        ResponseEntity<UserRest> response = register(user, UserRest.class);
+        UserEntity userDb = userRespository.findById(response.getBody().getId());
+        assertNotEquals(user.getPassword(), userDb.getPassword()); // they equal, means password is not being hashed
+    }
+
+    @Test
+    public void createValidUser_returnsError_emailAlreadyInUse() {
+        UserRegisterRequestModel user = TestUtil.createValidUser();
+        register(user, UserRest.class);
+        ResponseEntity<UserRest> response2 = register(user, UserRest.class);
+        assertEquals(response2.getStatusCode(), HttpStatus.BAD_REQUEST); // user duplicate
+    }
+
+    @Test // no email error display
+    public void createValidUser_emailAlreadyInUser_returnsErros() {
+        UserRegisterRequestModel user = TestUtil.createValidUser();
+        register(user, UserRest.class);
+        ResponseEntity<ValidationErrors> response2 = register(user, ValidationErrors.class);
+        Map<String, String> errors = response2.getBody().getErrors();
+        assertTrue(errors.containsKey("email"));
     }
 
     public <T> ResponseEntity<T> register(UserRegisterRequestModel data, Class<T> responseType) {
