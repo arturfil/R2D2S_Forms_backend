@@ -93,7 +93,7 @@ public class LoginTests {
         return testRestTemplate.postForEntity(API_LOGIN_URL, data, responseType);
     }
 
-    public <T> ResponseEntity<T> login(UserLoginRequestModel data, ParameterizedTypeReference responseType) {
+    public <T> ResponseEntity<T> login(UserLoginRequestModel data, ParameterizedTypeReference<T> responseType) {
         HttpEntity<UserLoginRequestModel> entity = new HttpEntity<UserLoginRequestModel>(data, new HttpHeaders());
         return testRestTemplate.exchange(API_LOGIN_URL, HttpMethod.POST, entity, responseType);
     }

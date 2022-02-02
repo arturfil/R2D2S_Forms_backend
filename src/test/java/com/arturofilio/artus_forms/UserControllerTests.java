@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Map;
 
 import com.arturofilio.artus_forms.entities.UserEntity;
+import com.arturofilio.artus_forms.models.requests.UserLoginRequestModel;
 import com.arturofilio.artus_forms.models.requests.UserRegisterRequestModel;
 import com.arturofilio.artus_forms.models.responses.UserRest;
 import com.arturofilio.artus_forms.models.responses.ValidationErrors;
@@ -20,6 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
@@ -29,6 +34,7 @@ import org.springframework.test.context.ActiveProfiles;
 public class UserControllerTests {
     
     private static final String API_URL = "/api/users";
+    private static final String API_LOGIN_URL = "/api/users/login";
 
     @Autowired
     TestRestTemplate testRestTemplate;
@@ -144,15 +150,61 @@ public class UserControllerTests {
     }
 
     @Test // no email error display
-    public void createValidUser_emailAlreadyInUser_returnsErros() {
+    public void createValidUser_emailAlreadyInUser_returnsErrors() {
         UserRegisterRequestModel user = TestUtil.createValidUser();
         register(user, UserRest.class);
         ResponseEntity<ValidationErrors> response2 = register(user, ValidationErrors.class);
         Map<String, String> errors = response2.getBody().getErrors();
         assertTrue(errors.containsKey("email"));
     }
+    
+    @Test // user without token
+    public void getUser_withoutToken_returnsErrors() {
+        ResponseEntity<Object> response = getUser(null, new ParameterizedTypeReference<Object>(){});
+        assertEquals(response.getStatusCode(), HttpStatus.FORBIDDEN);
+    }
+
+    @Test // get user with valid token
+    public void getUser_withToken_returns200Status() {
+        UserRegisterRequestModel user = TestUtil.createValidUser();
+        userService.createUser(user);
+        UserLoginRequestModel model = new UserLoginRequestModel();
+        model.setEmail(user.getEmail());
+        model.setPassword(user.getPassword());
+        ResponseEntity<Map<String, String>> responseLogin = login(model, new ParameterizedTypeReference<Map<String, String>>(){});
+        Map<String, String> body = responseLogin.getBody();
+        String token = body.get("token");
+        ResponseEntity<UserRest> response = getUser(token, new ParameterizedTypeReference<UserRest>(){});
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+    }
+
+    @Test // get user with valid token
+    public void getUser_withToken_returnsUserRest() {
+        UserRegisterRequestModel user = TestUtil.createValidUser();
+        userService.createUser(user);
+        UserLoginRequestModel model = new UserLoginRequestModel();
+        model.setEmail(user.getEmail());
+        model.setPassword(user.getPassword());
+        ResponseEntity<Map<String, String>> responseLogin = login(model, new ParameterizedTypeReference<Map<String, String>>(){});
+        Map<String, String> body = responseLogin.getBody();
+        String token = body.get("token");
+        ResponseEntity<UserRest> response = getUser(token, new ParameterizedTypeReference<UserRest>(){});
+        assertEquals(user.getName(), response.getBody().getName());
+    }
 
     public <T> ResponseEntity<T> register(UserRegisterRequestModel data, Class<T> responseType) {
         return testRestTemplate.postForEntity(API_URL, data, responseType);
+    }
+
+    public <T> ResponseEntity<T> login(UserLoginRequestModel data, ParameterizedTypeReference<T> responseType) {
+        HttpEntity<UserLoginRequestModel> entity = new HttpEntity<UserLoginRequestModel>(data, new HttpHeaders());
+        return testRestTemplate.exchange(API_LOGIN_URL, HttpMethod.POST, entity, responseType);
+    }
+
+    public <T> ResponseEntity<T> getUser(String token, ParameterizedTypeReference<T> responseType) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        HttpEntity<Object> entity = new HttpEntity<Object>(null, headers);
+        return testRestTemplate.exchange(API_URL, HttpMethod.GET, entity, responseType);
     }
 }
