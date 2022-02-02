@@ -17,7 +17,7 @@ public class TestUtil {
         String chars = "ABCDEFGHIJLMNOPQRSTUVWXYZabcdefghijlmnopqrstuvwxyz";
         Random randNumber = new Random();
         StringBuilder sbuilder = new StringBuilder(len);
-        for (int i = 0; i < sbuilder.length(); i++) {
+        for (int i = 0; i < len; i++) {
             sbuilder.append(chars.charAt(randNumber.nextInt(chars.length())));
         }
         return sbuilder.toString();
