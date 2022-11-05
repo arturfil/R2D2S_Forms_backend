@@ -3,7 +3,9 @@ package com.arturofilio.artus_forms.controllers;
 import javax.validation.Valid;
 
 import com.arturofilio.artus_forms.models.requests.PollCreationRequestModel;
+import com.arturofilio.artus_forms.services.IPollService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,9 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/polls")
 public class PollController {
 
+    @Autowired
+    IPollService pollService;
+
     @PostMapping
     public String createPoll(@RequestBody @Valid PollCreationRequestModel pollCreationRequestModel,
-            Authentication authentication) {
-        return authentication.getPrincipal().toString();
+               Authentication authentication) {
+        return pollService.createPoll(pollCreationRequestModel, authentication.getPrincipal().toString());
     }
 }
