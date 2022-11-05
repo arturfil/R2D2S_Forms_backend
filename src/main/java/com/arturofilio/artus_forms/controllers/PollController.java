@@ -20,8 +20,8 @@ public class PollController {
     IPollService pollService;
 
     @PostMapping
-    public String createPoll(@RequestBody @Valid PollCreationRequestModel pollCreationRequestModel,
-               Authentication authentication) {
-        return pollService.createPoll(pollCreationRequestModel, authentication.getPrincipal().toString());
+    public String createPoll(@RequestBody @Valid PollCreationRequestModel model,
+            Authentication authentication) {
+        return pollService.createPoll(model, authentication.getPrincipal().toString());
     }
 }

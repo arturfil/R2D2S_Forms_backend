@@ -27,8 +27,10 @@ public class PollServiceImpl implements IPollService {
         UserEntity user = userRepository.findByEmail(email);
         ModelMapper mapper = new ModelMapper();
         PollEntity pollEntity = mapper.map(model, PollEntity.class);
+
         pollEntity.setUser(user);
         pollEntity.setPollId(UUID.randomUUID().toString());
+        
         for(QuestionEntity question: pollEntity.getQuestions()) {
             question.setPoll(pollEntity);
             for(AnswerEntity answer: question.getAnswers()) {
