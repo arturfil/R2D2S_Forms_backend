@@ -3,6 +3,7 @@ package com.arturofilio.artus_forms.services;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
 
 import com.arturofilio.artus_forms.entities.AnswerEntity;
 import com.arturofilio.artus_forms.entities.PollEntity;
@@ -12,6 +13,7 @@ import com.arturofilio.artus_forms.models.requests.PollCreationRequestModel;
 import com.arturofilio.artus_forms.repositories.IPollRepository;
 import com.arturofilio.artus_forms.repositories.IUserRepository;
 
+@Service
 public class PollServiceImpl implements IPollService {
 
     IPollRepository pollRepository;
@@ -30,7 +32,7 @@ public class PollServiceImpl implements IPollService {
 
         pollEntity.setUser(user);
         pollEntity.setPollId(UUID.randomUUID().toString());
-        
+
         for(QuestionEntity question: pollEntity.getQuestions()) {
             question.setPoll(pollEntity);
             for(AnswerEntity answer: question.getAnswers()) {
@@ -39,6 +41,13 @@ public class PollServiceImpl implements IPollService {
         }
         pollRepository.save(pollEntity);
         return pollEntity.getPollId();
+    }
+
+    @Override
+    public PollEntity getPoll(String pollId) {
+        PollEntity poll = pollRepository.findPollById(pollId);
+        if (poll == null) throw new RuntimeException("Poll not found");
+        return poll;
     }
     
 }

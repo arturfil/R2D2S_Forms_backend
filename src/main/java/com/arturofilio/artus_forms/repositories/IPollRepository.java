@@ -7,5 +7,5 @@ import com.arturofilio.artus_forms.entities.PollEntity;
 
 @Repository
 public interface IPollRepository extends CrudRepository<PollEntity, Long> {
-     
+    public PollEntity findPollById(String pollId);
 }
