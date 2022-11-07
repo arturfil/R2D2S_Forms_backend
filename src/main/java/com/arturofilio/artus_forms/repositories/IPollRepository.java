@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.arturofilio.artus_forms.entities.PollEntity;
 
 @Repository
-public interface IPollRepository extends CrudRepository<PollEntity, Long> {
+public interface IPollRepository extends CrudRepository<PollEntity, String> {
     public PollEntity findPollById(String pollId);
 }
