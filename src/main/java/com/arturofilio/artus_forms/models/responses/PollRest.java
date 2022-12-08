@@ -1,9 +1,6 @@
 package com.arturofilio.artus_forms.models.responses;
 
 import java.util.List;
-
-import org.aspectj.weaver.patterns.TypePatternQuestions.Question;
-
 import lombok.Data;
 
 @Data

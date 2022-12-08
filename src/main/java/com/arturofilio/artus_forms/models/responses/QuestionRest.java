@@ -1,7 +1,6 @@
 package com.arturofilio.artus_forms.models.responses;
 
 import java.util.List;
-
 import com.arturofilio.artus_forms.enums.QuestionType;
 
 import lombok.Data;
@@ -14,3 +13,4 @@ public class QuestionRest {
     private QuestionType type;
     private List<AnswerRest> answers;
 }
+ 
